@@ -1,26 +1,60 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
+import Transactions from "./components/Transactions";
+import { jwtDecode } from "jwt-decode";
+import { JwtPayload } from "./utils/types";
 
-function App() {
+const App: React.FC = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!localStorage.getItem("token"));
+  const [userId, setUserId] = useState<string>("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode<JwtPayload>(token);
+        setUserId(decoded.sub);
+      } catch (err) {
+        console.error("Invalid token", err);
+        localStorage.removeItem("token");
+        setIsLoggedIn(false);
+      }
+    }
+  }, [isLoggedIn]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    setUserId("");
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <nav>
+        {!isLoggedIn && (
+          <>
+            <Link to="/login">Login</Link> | <Link to="/signup">Signup</Link>
+          </>
+        )}
+        {isLoggedIn && (
+          <button onClick={handleLogout}>Logout</button>
+        )}
+      </nav>
+      <Routes>
+        {!isLoggedIn ? (
+          <>
+            <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
+            <Route path="/signup" element={<Signup onSignup={() => setIsLoggedIn(true)} />} />
+            <Route path="*" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
+          </>
+        ) : (
+          <Route path="*" element={<Transactions userId={userId} onLogout={handleLogout} />} />
+        )}
+      </Routes>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;
