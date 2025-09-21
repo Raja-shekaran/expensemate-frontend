@@ -16,7 +16,6 @@ export interface AuthResponse {
 export type TransactionType = "INCOME" | "EXPENSE";
 
 export interface TransactionRequest {
-  userId: string;
   amount: number;
   type: TransactionType;
   categoryId?: string;
