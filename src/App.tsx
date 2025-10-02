@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import "./index.css";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Transactions from "./components/Transactions";
 import { jwtDecode } from "jwt-decode";
 import { JwtPayload } from "./utils/types";
+import Dashboard from "./components/Dashboard";
+import Categories from "./components/Categories";
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(
@@ -25,7 +27,7 @@ const App: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setIsLoggedIn(false)
+    setIsLoggedIn(false);
   };
 
   return (
@@ -34,7 +36,7 @@ const App: React.FC = () => {
       <nav className="bg-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-md">
         <h1 className="text-2xl font-bold tracking-wide">ExpenseMate</h1>
         <div className="flex gap-4">
-          {!isLoggedIn && (
+          {!isLoggedIn ? (
             <>
               <Link
                 to="/login"
@@ -49,14 +51,33 @@ const App: React.FC = () => {
                 Signup
               </Link>
             </>
-          )}
-          {isLoggedIn && (
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition"
-            >
-              Logout
-            </button>
+          ) : (
+            <>
+              <Link
+                to="/transactions"
+                className="bg-white text-indigo-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition"
+              >
+                Transactions
+              </Link>
+              <Link
+                to="/dashboard"
+                className="bg-white text-indigo-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition"
+              >
+                Dashboard
+              </Link>
+              <Link
+                to="/categories"
+                className="bg-white text-indigo-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition"
+              >
+                Categories
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition"
+              >
+                Logout
+              </button>
+            </>
           )}
         </div>
       </nav>
@@ -80,10 +101,13 @@ const App: React.FC = () => {
               />
             </>
           ) : (
-            <Route
-              path="*"
-              element={<Transactions onLogout={handleLogout} />}
-            />
+            <>
+              <Route path="/transactions" element={<Transactions onLogout={handleLogout} />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/categories" element={<Categories />} />
+              {/* Default after login → Transactions */}
+              <Route path="*" element={<Transactions onLogout={handleLogout} />} />
+            </>
           )}
         </Routes>
       </div>

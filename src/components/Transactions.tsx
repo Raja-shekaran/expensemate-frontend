@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
-import { getTransactions, addTransaction, deleteTransaction } from "../api/transactions";
+import {
+  getTransactions,
+  addTransaction,
+  deleteTransaction,
+} from "../api/transactions";
 import { Transaction, TransactionRequest } from "../utils/types";
+import { getCategories, Category } from "../api/category";
 
 interface Props {
   onLogout: () => void;
@@ -17,6 +22,13 @@ const Transactions: React.FC<Props> = ({ onLogout }) => {
   });
   const [loading, setLoading] = useState(false);
 
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    fetchTransactions();
+    getCategories().then(setCategories);
+  }, []);
+
   const fetchTransactions = async () => {
     try {
       const data = await getTransactions();
@@ -30,7 +42,9 @@ const Transactions: React.FC<Props> = ({ onLogout }) => {
     fetchTransactions();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
@@ -113,14 +127,19 @@ const Transactions: React.FC<Props> = ({ onLogout }) => {
             className="w-full p-2 border rounded-lg focus:ring focus:ring-indigo-300"
             required
           />
-          <input
-            type="text"
+          <select
             name="categoryId"
-            placeholder="Category ID (optional)"
             value={form.categoryId}
             onChange={handleChange}
             className="w-full p-2 border rounded-lg focus:ring focus:ring-indigo-300"
-          />
+          >
+            <option value="">-- Select Category (optional) --</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
           <button
             type="submit"
             disabled={loading}
@@ -159,7 +178,9 @@ const Transactions: React.FC<Props> = ({ onLogout }) => {
                     ₹{tx.amount}
                   </td>
                   <td className="p-2">{tx.type}</td>
-                  <td className="p-2">{new Date(tx.date).toLocaleDateString()}</td>
+                  <td className="p-2">
+                    {new Date(tx.date).toLocaleDateString()}
+                  </td>
                   <td className="p-2">
                     <button
                       onClick={() => handleDelete(tx.id)}
