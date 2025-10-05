@@ -32,6 +32,7 @@ const App: React.FC = () => {
       }
     }
   }, [isLoggedIn]);
+  
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
