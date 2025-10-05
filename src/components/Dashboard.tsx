@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
-import api from "../api/api";
-
-interface Summary {
-  totalIncome: number;
-  totalExpense: number;
-  balance: number;
-}
+import { Summary } from "../utils/types";
+import { getSummary } from "../api/dashboard";
 
 const Dashboard = () => {
   const [summary, setSummary] = useState<Summary | null>(null);
 
+  const fetchSummary = async () => {
+      try {
+        const data = await getSummary();
+        setSummary(data);
+      } catch (err) {
+        console.error("Error fetching summary:", err);
+      }
+    };
+
   useEffect(() => {
-    api.get("/dashboard/summary").then((res) => setSummary(res.data));
+    fetchSummary()
   }, []);
 
   if (!summary) return <p>Loading...</p>;

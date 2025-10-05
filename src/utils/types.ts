@@ -1,3 +1,5 @@
+export type TransactionType = "INCOME" | "EXPENSE";
+
 export interface SignupRequest {
   name: string;
   email: string;
@@ -12,8 +14,6 @@ export interface LoginRequest {
 export interface AuthResponse {
   token: string;
 }
-
-export type TransactionType = "INCOME" | "EXPENSE";
 
 export interface TransactionRequest {
   amount: number;
@@ -37,4 +37,16 @@ export interface JwtPayload {
   sub: string;
   exp: number;
   iat: number;
+}
+
+export interface Category {
+  id: string;
+  userId: string;
+  name: string;
+}
+
+export interface Summary {
+  totalIncome: number;
+  totalExpense: number;
+  balance: number;
 }

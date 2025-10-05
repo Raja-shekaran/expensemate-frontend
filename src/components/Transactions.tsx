@@ -4,8 +4,8 @@ import {
   addTransaction,
   deleteTransaction,
 } from "../api/transactions";
-import { Transaction, TransactionRequest } from "../utils/types";
-import { getCategories, Category } from "../api/category";
+import { Category, Transaction, TransactionRequest } from "../utils/types";
+import { getCategories } from "../api/category";
 
 interface Props {
   onLogout: () => void;
