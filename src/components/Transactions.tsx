@@ -1,18 +1,9 @@
-import { useState, useEffect } from "react";
-import {
-  getTransactions,
-  addTransaction,
-  deleteTransaction,
-} from "../api/transactions";
-import { Category, Transaction, TransactionRequest } from "../utils/types";
-import { getCategories } from "../api/category";
+import React, { useState } from "react";
+import { TransactionRequest } from "../utils/types";
+import { useExpense } from "../context/ExpenseContext";
 
-interface Props {
-  onLogout: () => void;
-}
-
-const Transactions: React.FC<Props> = ({ onLogout }) => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+const Transactions: React.FC = () => {
+  const { state, addTransaction, deleteTransaction } = useExpense();
   const [form, setForm] = useState<TransactionRequest>({
     amount: 0,
     type: "EXPENSE",
@@ -21,26 +12,6 @@ const Transactions: React.FC<Props> = ({ onLogout }) => {
     categoryId: "",
   });
   const [loading, setLoading] = useState(false);
-
-  const [categories, setCategories] = useState<Category[]>([]);
-
-  useEffect(() => {
-    fetchTransactions();
-    getCategories().then(setCategories);
-  }, []);
-
-  const fetchTransactions = async () => {
-    try {
-      const data = await getTransactions();
-      setTransactions(data);
-    } catch {
-      alert("Failed to fetch transactions");
-    }
-  };
-
-  useEffect(() => {
-    fetchTransactions();
-  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -57,8 +28,13 @@ const Transactions: React.FC<Props> = ({ onLogout }) => {
     setLoading(true);
     try {
       await addTransaction(form);
-      setForm((prev) => ({ ...prev, amount: 0, notes: "", categoryId: "" }));
-      await fetchTransactions();
+      setForm({
+        amount: 0,
+        type: "EXPENSE",
+        date: new Date().toISOString().split("T")[0],
+        notes: "",
+        categoryId: "",
+      });
     } catch {
       alert("Failed to add transaction");
     } finally {
@@ -66,103 +42,96 @@ const Transactions: React.FC<Props> = ({ onLogout }) => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteTransaction(id);
-      await fetchTransactions();
-    } catch {
-      alert("Failed to delete transaction");
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      {/* Navbar */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Transactions</h1>
-      </div>
+    <div className="bg-white p-6 rounded-xl shadow-soft mb-6">
+      <h2 className="text-xl font-semibold text-gray-700 mb-4">
+        Add Transaction
+      </h2>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <input
+          type="text"
+          name="notes"
+          placeholder="Notes"
+          value={form.notes}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          required
+        />
+        <input
+          type="text"
+          name="amount"
+          placeholder="Amount"
+          value={form.amount === 0 ? "" : form.amount}
+          onChange={(e) => {
+            const val = e.target.value.replace(/[^0-9.]/g, ""); // allow only digits & dot
+            setForm((prev) => ({
+              ...prev,
+              amount: val === "" ? 0 : Number(val),
+            }));
+          }}
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          required
+        />
 
-      {/* Add Transaction Form */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Add Transaction</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="notes"
-            placeholder="Notes"
-            value={form.notes}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-lg focus:ring focus:ring-indigo-300"
-            required
-          />
-          <input
-            type="number"
-            name="amount"
-            placeholder="Amount"
-            value={form.amount}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-lg focus:ring focus:ring-indigo-300"
-            required
-          />
-          <select
-            name="type"
-            value={form.type}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-lg focus:ring focus:ring-indigo-300"
-          >
-            <option value="INCOME">Income</option>
-            <option value="EXPENSE">Expense</option>
-          </select>
-          <input
-            type="date"
-            name="date"
-            value={form.date}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-lg focus:ring focus:ring-indigo-300"
-            required
-          />
-          <select
-            name="categoryId"
-            value={form.categoryId}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-lg focus:ring focus:ring-indigo-300"
-          >
-            <option value="">-- Select Category (optional) --</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-          >
-            {loading ? "Adding..." : "Add Transaction"}
-          </button>
-        </form>
-      </div>
+        <select
+          name="type"
+          value={form.type}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+        >
+          <option value="INCOME">Income</option>
+          <option value="EXPENSE">Expense</option>
+        </select>
+        <input
+          type="date"
+          name="date"
+          value={form.date}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          required
+        />
+        <select
+          name="categoryId"
+          value={form.categoryId}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+        >
+          <option value="">-- Select Category (optional) --</option>
+          {state.categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
+        >
+          {loading ? "Adding..." : "Add Transaction"}
+        </button>
+      </form>
 
-      {/* Transactions History */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Transaction History</h2>
-        {transactions.length === 0 ? (
-          <p className="text-gray-500">No transactions yet.</p>
-        ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="p-2 text-left">Notes</th>
-                <th className="p-2 text-left">Amount</th>
-                <th className="p-2 text-left">Type</th>
-                <th className="p-2 text-left">Date</th>
-                <th className="p-2 text-left">Actions</th>
+      <h2 className="text-xl font-semibold text-gray-700 mt-6 mb-3">
+        Transaction History
+      </h2>
+      {state.transactions.length === 0 ? (
+        <p className="text-gray-500">No transactions yet.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-blue-100 text-blue-800">
+              <tr>
+                <th className="p-2">Notes</th>
+                <th className="p-2">Amount</th>
+                <th className="p-2">Type</th>
+                <th className="p-2">Date</th>
+                <th className="p-2">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {transactions.map((tx) => (
-                <tr key={tx.id} className="border-b">
+              {state.transactions.map((tx) => (
+                <tr key={tx.id} className="border-b hover:bg-gray-50">
                   <td className="p-2">{tx.notes}</td>
                   <td
                     className={`p-2 font-semibold ${
@@ -177,8 +146,8 @@ const Transactions: React.FC<Props> = ({ onLogout }) => {
                   </td>
                   <td className="p-2">
                     <button
-                      onClick={() => handleDelete(tx.id)}
-                      className="px-2 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                      onClick={() => deleteTransaction(tx.id)}
+                      className="px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
                     >
                       Delete
                     </button>
@@ -187,8 +156,8 @@ const Transactions: React.FC<Props> = ({ onLogout }) => {
               ))}
             </tbody>
           </table>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

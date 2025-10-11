@@ -1,144 +1,83 @@
-import React, { useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
+import React, { useState } from "react";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Transactions from "./components/Transactions";
 import Categories from "./components/Categories";
 import Dashboard from "./components/Dashboard";
-import { JwtPayload } from "./utils/types";
+import { ExpenseProvider, useExpense } from "./context/ExpenseContext";
 import "./index.css";
 
-type AuthTab = "login" | "signup";
-type DashTab = "transactions";
+const MainApp = () => {
+  const { state, logout } = useExpense();
+  const [showSignup, setShowSignup] = useState(false);
 
-const App: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(
-    !!localStorage.getItem("token")
-  );
-  const [userId, setUserId] = useState<string>("");
-  const [authTab, setAuthTab] = useState<AuthTab>("login");
-  const [dashTab, setDashTab] = useState<DashTab>("transactions");
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decoded = jwtDecode<JwtPayload>(token);
-        setUserId(decoded.sub);
-      } catch (err) {
-        console.error("Invalid token", err);
-        localStorage.removeItem("token");
-        setIsLoggedIn(false);
-      }
-    }
-  }, [isLoggedIn]);
-  
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
-    setUserId("");
-    setAuthTab("login");
-    setDashTab("transactions");
-  };
-
-  const onLoginSuccess = () => {
-    setIsLoggedIn(true);
-    setDashTab("transactions");
-  };
-
-  const onSignupComplete = () => {
-    setAuthTab("login");
-    setTimeout(() => alert("Signup successful — please login."), 50);
-  };
-
-  if (!isLoggedIn) {
+  // Auth view
+  if (!state.token) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
-        <header className="mb-8">
-          <h1 className="text-4xl font-extrabold text-yellow-500 tracking-wider">
-            ExpenseMate
-          </h1>
-        </header>
-
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-lg overflow-hidden">
-          <div className="flex bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
+        <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-soft">
+          {showSignup ? (
+            <Signup onSwitchToLogin={() => setShowSignup(false)} />
+          ) : (
+            <Login />
+          )}
+          <p className="mt-4 text-center text-gray-600">
+            {showSignup
+              ? "Already have an account? "
+              : "Don’t have an account? "}
             <button
-              className={`flex-1 py-3 text-center font-medium transition ${
-                authTab === "login"
-                  ? "bg-white text-indigo-700 border-b-2 border-indigo-600"
-                  : "text-gray-500 hover:bg-gray-100"
+              onClick={() => setShowSignup(!showSignup)}
+              className={`underline font-semibold ${
+                showSignup ? "text-blue-600" : "text-blue-700"
               }`}
-              onClick={() => setAuthTab("login")}
             >
-              Login
+              {showSignup ? "Login" : "Signup"}
             </button>
-            <button
-              className={`flex-1 py-3 text-center font-medium transition ${
-                authTab === "signup"
-                  ? "bg-white text-yellow-600 border-b-2 border-yellow-500"
-                  : "text-gray-500 hover:bg-gray-100"
-              }`}
-              onClick={() => setAuthTab("signup")}
-            >
-              Signup
-            </button>
-          </div>
-
-          <div className="p-6">
-            {authTab === "login" ? (
-              <Login onLogin={onLoginSuccess} />
-            ) : (
-              <Signup onSignupComplete={onSignupComplete} />
-            )}
-          </div>
+          </p>
         </div>
       </div>
     );
   }
 
+  // Logged-in dashboard
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-yellow-400 text-black p-4 flex items-center justify-between shadow">
-        <div>
-          <h1 className="text-2xl font-bold">ExpenseMate</h1>
+    <div className="min-h-screen bg-slate-50">
+      {/* Navbar */}
+      <nav className="flex justify-between items-center p-4 bg-white shadow-soft sticky top-0 z-50">
+        <h1 className="text-2xl font-bold text-blue-800">ExpenseMate</h1>
+        <button
+          onClick={logout}
+          className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all duration-300"
+        >
+          Logout
+        </button>
+      </nav>
+
+      {/* Main Content */}
+      <div className="p-6 grid gap-6 md:grid-cols-3">
+        {/* Dashboard */}
+        <div className="md:col-span-3">
+          <Dashboard />
         </div>
 
-        <div className="flex items-center gap-3">
-          <nav className="hidden sm:flex gap-2">
-            <button
-              onClick={() => setDashTab("transactions")}
-              className={`px-4 py-2 rounded-lg font-medium ${
-                dashTab === "transactions"
-                  ? "bg-white text-yellow-500"
-                  : "text-white/90 hover:bg-white/10"
-              }`}
-            >
-              Transactions
-            </button>
-          </nav>
-
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 text-white px-3 py-2 rounded-md hover:bg-red-600"
-          >
-            Logout
-          </button>
+        {/* Transactions */}
+        <div className="md:col-span-2">
+          <Transactions />
         </div>
-      </header>
 
-      <main className="max-w-5xl mx-auto p-6">
-        {dashTab === "transactions" && (
-          <>
-            <Dashboard />
-            <Categories />
-            <div className="mt-6 bg-white p-6 rounded-2xl shadow">
-              <Transactions onLogout={handleLogout} />
-            </div>
-          </>
-        )}
-      </main>
+        {/* Categories */}
+        <div className="md:col-span-1">
+          <Categories />
+        </div>
+      </div>
     </div>
   );
 };
+
+const App = () => (
+  <ExpenseProvider>
+    <MainApp />
+  </ExpenseProvider>
+);
 
 export default App;

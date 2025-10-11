@@ -1,78 +1,48 @@
-import { useState, useEffect } from "react";
-import { getCategories, addCategory, deleteCategory } from "../api/category";
-import { Category } from "../utils/types";
+import React, { useState } from "react";
+import { useExpense } from "../context/ExpenseContext";
 
-const Categories = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
+const Categories: React.FC = () => {
+  const { state, addCategory, deleteCategory } = useExpense();
   const [name, setName] = useState("");
-
-  const fetchCategories = async () => {
-    try {
-      const data = await getCategories();
-      setCategories(data);
-    } catch (err) {
-      console.error("Error fetching categories:", err);
-    }
-  };
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-
     try {
-      const newCat = await addCategory(name);
-      setCategories([...categories, newCat]);
+      await addCategory(name);
       setName("");
-    } catch (err) {
-      console.error("Error adding category:", err);
+    } catch {
+      alert("Failed to add category");
     }
   };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteCategory(id);
-      setCategories(categories.filter((c) => c.id !== id));
-    } catch (err) {
-      console.error("Error deleting category:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
 
   return (
-    <div className="p-6 max-w-lg mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Categories</h2>
+    <div className="bg-white p-6 rounded-xl shadow-soft">
+      <h2 className="text-xl font-semibold text-gray-700 mb-4">Categories</h2>
 
-      {/* Add Category Form */}
-      <form onSubmit={handleAdd} className="flex gap-2 mb-6">
+      <form onSubmit={handleAdd} className="flex gap-2 mb-4">
         <input
           type="text"
           placeholder="Category name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="flex-1 p-2 border rounded-lg focus:ring focus:ring-indigo-300"
+          className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
         />
         <button
           type="submit"
-          className="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600"
+          className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           Add
         </button>
       </form>
 
-      {/* Category List */}
       <ul className="space-y-2">
-        {categories.map((cat) => (
-          <li
-            key={cat.id}
-            className="flex justify-between items-center p-2 border rounded-lg shadow-sm"
-          >
+        {state.categories.map((cat) => (
+          <li key={cat.id} className="flex justify-between items-center p-2 bg-blue-50 rounded-lg">
             <span>{cat.name}</span>
             <button
-              onClick={() => handleDelete(cat.id)}
-              className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+              onClick={() => deleteCategory(cat.id)}
+              className="px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
             >
               Delete
             </button>

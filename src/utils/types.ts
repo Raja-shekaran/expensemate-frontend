@@ -50,3 +50,19 @@ export interface Summary {
   totalExpense: number;
   balance: number;
 }
+
+//for context
+
+export interface State {
+  token: string | null;
+  transactions: Transaction[];
+  categories: Category[];
+  summary: Summary | null;
+  loading: boolean;
+}
+
+export type Action =
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_TOKEN"; payload: string }
+  | { type: "LOGOUT" }
+  | { type: "REFRESH_ALL"; payload: { transactions: Transaction[]; categories: Category[]; summary: Summary } };

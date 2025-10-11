@@ -1,17 +1,10 @@
 import React, { useState } from "react";
-import { signup } from "../api/auth";
 import { SignupRequest } from "../utils/types";
+import { useExpense } from "../context/ExpenseContext";
 
-interface Props {
-  onSignupComplete: () => void;
-}
-
-const Signup: React.FC<Props> = ({ onSignupComplete }) => {
-  const [form, setForm] = useState<SignupRequest>({
-    name: "",
-    email: "",
-    password: "",
-  });
+const Signup: React.FC<{ onSwitchToLogin?: () => void }> = ({ onSwitchToLogin }) => {
+  const { signup } = useExpense();
+  const [form, setForm] = useState<SignupRequest>({ name: "", email: "", password: "" });
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -28,9 +21,10 @@ const Signup: React.FC<Props> = ({ onSignupComplete }) => {
     setLoading(true);
     try {
       await signup(form);
-      onSignupComplete();
-    } catch (err) {
-      console.error(err);
+      alert("Signup successful! Redirecting to login...");
+      // Redirect to login tab
+      if (onSwitchToLogin) onSwitchToLogin();
+    } catch {
       alert("Signup failed");
     } finally {
       setLoading(false);
@@ -44,7 +38,7 @@ const Signup: React.FC<Props> = ({ onSignupComplete }) => {
         placeholder="Full Name"
         value={form.name}
         onChange={handleChange}
-        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400"
+        className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary transition-all duration-300"
         required
       />
       <input
@@ -53,7 +47,7 @@ const Signup: React.FC<Props> = ({ onSignupComplete }) => {
         placeholder="Email"
         value={form.email}
         onChange={handleChange}
-        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400"
+        className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary transition-all duration-300"
         required
       />
       <input
@@ -62,7 +56,7 @@ const Signup: React.FC<Props> = ({ onSignupComplete }) => {
         placeholder="Password"
         value={form.password}
         onChange={handleChange}
-        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400"
+        className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary transition-all duration-300"
         required
       />
       <input
@@ -71,13 +65,13 @@ const Signup: React.FC<Props> = ({ onSignupComplete }) => {
         placeholder="Confirm Password"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
-        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400"
+        className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary transition-all duration-300"
         required
       />
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-yellow-400 text-black py-2 rounded-lg hover:bg-yellow-500"
+        className="w-full py-3 rounded-xl bg-secondary text-black font-semibold hover:bg-yellow-500 shadow-md transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
       >
         {loading ? "Creating..." : "Signup"}
       </button>

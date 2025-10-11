@@ -1,12 +1,9 @@
 import React, { useState } from "react";
-import { login } from "../api/auth"; // your axios wrapper
 import { LoginRequest } from "../utils/types";
+import { useExpense } from "../context/ExpenseContext";
 
-interface Props {
-  onLogin: () => void;
-}
-
-const Login: React.FC<Props> = ({ onLogin }) => {
+const Login: React.FC = () => {
+  const { login } = useExpense();
   const [form, setForm] = useState<LoginRequest>({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
@@ -18,11 +15,8 @@ const Login: React.FC<Props> = ({ onLogin }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await login(form); // should return { token }
-      localStorage.setItem("token", res.token);
-      onLogin();
-    } catch (err) {
-      console.error(err);
+      await login(form);
+    } catch {
       alert("Login failed");
     } finally {
       setLoading(false);
@@ -31,13 +25,14 @@ const Login: React.FC<Props> = ({ onLogin }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <h2 className="text-2xl font-bold text-blue-800 text-center mb-4">Login</h2>
       <input
         name="email"
         type="email"
         placeholder="Email"
         value={form.email}
         onChange={handleChange}
-        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+        className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
         required
       />
       <input
@@ -46,13 +41,13 @@ const Login: React.FC<Props> = ({ onLogin }) => {
         placeholder="Password"
         value={form.password}
         onChange={handleChange}
-        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+        className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
         required
       />
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700"
+        className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
       >
         {loading ? "Signing in..." : "Login"}
       </button>
