@@ -17,26 +17,30 @@ const Categories: React.FC = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-soft">
-      <h2 className="text-xl font-semibold text-gray-700 mb-4">Categories</h2>
+    <div className="bg-white rounded-2xl shadow-card p-6 w-full max-w-md mx-auto">
+      <h2 className="text-2xl font-semibold mb-4">Categories</h2>
 
       <form
         onSubmit={handleAdd}
-        className="flex flex-col sm:flex-row gap-2 mb-6"
+        className="flex flex-col sm:flex-row gap-2 mb-6 w-full"
       >
-        <input
-          type="text"
-          placeholder="Category name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300 w-full sm:w-auto"
-        />
-        <button
-          type="submit"
-          className="bg-primary text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition-all duration-300 shadow-md w-full sm:w-auto"
-        >
-          Add
-        </button>
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="Category name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+          />
+        </div>
+        <div className="w-full sm:w-auto">
+          <button
+            type="submit"
+            className="w-full sm:w-auto bg-primary text-white px-4 py-3 rounded-xl hover:bg-indigo-700 transition-all duration-300 shadow-md"
+          >
+            Add
+          </button>
+        </div>
       </form>
 
       <ul className="space-y-2">
