@@ -55,18 +55,17 @@ const MainApp = () => {
 
       {/* Main Content */}
       <div className="p-6 grid gap-6 md:grid-cols-3">
-        {/* Dashboard */}
+        {/* Dashboard spans full width */}
         <div className="md:col-span-3">
           <Dashboard />
         </div>
 
-        {/* Transactions */}
-        <div className="md:col-span-2">
+        {/* Transactions + Categories */}
+        <div className="md:col-span-2 flex flex-col gap-6">
           <Transactions />
         </div>
 
-        {/* Categories */}
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 flex flex-col gap-6">
           <Categories />
         </div>
       </div>
