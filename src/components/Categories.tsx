@@ -20,17 +20,20 @@ const Categories: React.FC = () => {
     <div className="bg-white p-6 rounded-xl shadow-soft">
       <h2 className="text-xl font-semibold text-gray-700 mb-4">Categories</h2>
 
-      <form onSubmit={handleAdd} className="flex gap-2 mb-4">
+      <form
+        onSubmit={handleAdd}
+        className="flex flex-col sm:flex-row gap-2 mb-6"
+      >
         <input
           type="text"
           placeholder="Category name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          className="flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300 w-full sm:w-auto"
         />
         <button
           type="submit"
-          className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="bg-primary text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition-all duration-300 shadow-md w-full sm:w-auto"
         >
           Add
         </button>
@@ -38,7 +41,10 @@ const Categories: React.FC = () => {
 
       <ul className="space-y-2">
         {state.categories.map((cat) => (
-          <li key={cat.id} className="flex justify-between items-center p-2 bg-blue-50 rounded-lg">
+          <li
+            key={cat.id}
+            className="flex justify-between items-center p-2 bg-blue-50 rounded-lg"
+          >
             <span>{cat.name}</span>
             <button
               onClick={() => deleteCategory(cat.id)}
